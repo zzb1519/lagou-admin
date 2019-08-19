@@ -1,0 +1,3 @@
+1在本地生成公钥和私钥
+
+ssh-keygen  -t rsa -C 906332513@qq.com
