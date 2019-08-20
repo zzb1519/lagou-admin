@@ -29,6 +29,10 @@ module.exports = {
             {
                 test:/\.art$/,
                 loader:'art-template-loader'
+            },
+            {
+                test:/\.(scss|css)$/,
+                loader:['style-loader' , 'css-loader' , 'sass-loader']
             }
         ]
     },
@@ -46,7 +50,8 @@ module.exports = {
           new copyWebpackPlugin([{
               from:'./public',
               to:'./public'
-          }])
+          }]),
+
 
       ]
 
