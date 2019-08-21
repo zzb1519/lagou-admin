@@ -1,0 +1,17 @@
+const mongoose = require('../utils/db')
+
+const Users =  mongoose.model('users' , {
+    username:String,
+    password:String
+})
+
+module.exports = {
+    save({ username , password}) {
+        const users = new Users({
+            username:username,
+            password:password
+        })
+
+        return users.save()
+    }
+}
