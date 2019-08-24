@@ -13,5 +13,8 @@ module.exports = {
         })
 
         return users.save()
+    },
+    findOne(username){
+        return Users.findOne({username})
     }
 }

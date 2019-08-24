@@ -10,5 +10,13 @@ module.exports = {
                     )
                 })
             });
+    },
+    compare(myPlaintextPassword , hash) {
+      return new Promise((resolve , reject) => {
+        bcrypt.compare(myPlaintextPassword, hash, function(err, res) {
+            // res == true
+            resolve(res)
+        });
+      })
     }
 }
