@@ -15,7 +15,8 @@ function remove(id , res){
         },
         success(result){
             if(result.ret){
-                res.go('/position?_='+ new Date().getTime())
+                // res.go('/position?_='+ new Date().getTime())
+                loadshData(res.pageNo , res)
             }
         }
     })
@@ -23,6 +24,7 @@ function remove(id , res){
 
 function loadshData(pageNo , res){
     let start = pageNo * COUNT
+    res.pageNo = pageNo
     $.ajax({
         url:'/api/position/list',
         data:{
@@ -31,12 +33,16 @@ function loadshData(pageNo , res){
         },
         success(result){
             if(result.ret){
+                if(result.data.list.length === 0 && pageNo !== 0){
+                    pageNo--
+                    loadshData(pageNo,res)
+                }
                 res.render(positonView({
                     ...result.data,
+                    showPage:true,
                     pageNo,
                     pageCount:_.range(Math.ceil(result.data.total/COUNT))
                 }))
-               
             }else{
                 res.go('/home')
             }
@@ -56,6 +62,7 @@ export default {
             
         })
         $('#router-view').on('click' , '#btn-edit' ,function(){
+            console.log(111);
             res.go('/position_edit' , {
                 id:$(this).attr('data-id')
             })
@@ -66,23 +73,53 @@ export default {
         $('#router-view').on('click' , '#page li[data-index]' ,function(){
             loadshData($(this).attr('data-index') , res)
         })
+        $('#router-view').on('click' , '#prev' ,function(){
+            let currentPage = $('#page li[class="active"]').attr('data-index')
+            loadshData((~~currentPage - 1) , res)
+        })
+        $('#router-view').on('click' , '#next' ,function(){
+            let currentPage = $('#page li[class="active"]').attr('data-index')
+            console.log(currentPage)
+            let index = ~~currentPage + 1
+            if(index < ~~$(this).attr('data-pagecount')){
+                loadshData(index , res)
+            }
+        })
+        $('#router-view').on('click', "#pos-search" ,function(){
+            let keywords = $("#keyword").val()
+            $.ajax({
+                url:'/api/position/search',
+                type:'POST',
+                data:{keywords},
+                success(result){
+                    if(result.ret){
+                        res.render(positonView({
+                            ...result.data,
+                            showPage:false
+                        }))
+                       
+                    }
+                }
+            })
+        })
+
     },
     add(req , res){
-        res.render(positonAddView(req))
+        res.render(positonAddView())
         $('#posback').on('click' ,() => {
             res.back()
         })
         $('#possubmit').on('click' , () => {
-            let data  = $('#possave').serialize()
-            $.ajax({
+            $('#possave').ajaxSubmit({
                 url:'api/position/save',
                 type:'POST',
-                data,
+                clearForm:true,
                 success(result){
+                    // console.log(result)
                     if(result.ret){
                         res.back()
                     }else{
-                        alert('数据添加失败')
+                        // alert('数据添加失败')
                     }
                 }
             })
@@ -104,17 +141,14 @@ export default {
                 })
 
                 $('#possubmit').on('click' , () => {
-                    let data  = $('#possave').serialize()
-                    $.ajax({
-                        url:'api/position/put',
-                        type:'PUT',
-                        data: data + '&id=' + req.body.id,
+                    $('#posedit').ajaxSubmit({
+                        url:'api/position/patch',
+                        type:'PATCH',
                         success(result){
-                            console.log(result);
                             if(result.ret){
                                 res.back()
                             }else{
-                                alert('数据修改失败')
+                                
                             }
                         }
                     })

@@ -20,6 +20,7 @@ module.exports = {
         // let result = await posModel.save(req.body)
         let result = await posModel.save({
             ...req.body,
+            companyLogo:req.filename,
             createTime: moment().format('YYYY-MM-DD hh:mm:ss') 
         })
         if(result){
@@ -44,11 +45,16 @@ module.exports = {
             })
         }
     },
-    async put(req , res , next){
-        let result = await posModel.put({
+    async patch(req , res , next){
+        // console.log(req.filename)
+        let data = {
             ...req.body,
-            createTime: moment().format('YYYY-MM-DD hh:mm:ss') 
-        })
+            createTime:moment().format('YYYY-MM-DD hh:mm:ss') 
+        }
+        if(req.filename){
+            data['companyLogo'] = req.filename
+        }
+        let result = await posModel.patch(data)
         if(result){
             res.render('succ', {
                 data: JSON.stringify({
@@ -81,5 +87,18 @@ module.exports = {
                 })
             })
         }
+    },
+    async search(req , res , next){
+        // let result = await posModel.search(req.body.keywords)
+        let {keywords} = req.body
+        let list = await posModel.search(keywords)
+        res.render('succ' , {
+            data:JSON.stringify({
+                list,
+                total:-1
+            })
+        })
+
+
     }
 }
